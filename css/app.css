@@ -31,6 +31,20 @@ body::-webkit-scrollbar {
     border-radius: 50%;
 }
 
+.profile-crop {
+    width: 18rem;
+    height: 22rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-crop>img {
+    display: inline;
+    margin: 0 auto;
+    height: auto;
+    width: 100%;
+}
+
 .img-crop>img {
     display: inline;
     margin: 0 auto;
