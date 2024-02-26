@@ -4,28 +4,19 @@ const sqlite3 = require('sqlite3');
 const path = require('path');
 const app = express();
 
-// Konfigurasi body-parser untuk mengurai body request
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(express.static('public'));
 
 
 // Inisialisasi database SQLite
-const db = new sqlite3.Database('./comments.db', (err) => {
+const db = new sqlite3.Database('./comments.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
         console.error(err.message);
     }
     console.log('Connected to the SQLite database.');
 });
 
-// Membuat tabel komentar jika belum ada
-// db.run(`
-//     CREATE TABLE comments (
-//      id INTEGER PRIMARY KEY AUTOINCREMENT,
-//      nama TEXT NOT NULL,
-//      hadir INTEGER NOT NULL,  -- Make sure this isn't BOOLEAN or has a DEFAULT value set to 0
-//      komentar TEXT NOT NULL,
-//     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-// )`);
 
 // Endpoint untuk menambahkan komentar baru
 app.post('/api/comment', (req, res) => {
@@ -81,11 +72,12 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// Melayani file statis
-app.use(express.static(path.join(__dirname)));
+// Server static files from 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Mulai server
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
+module.exports = app;
