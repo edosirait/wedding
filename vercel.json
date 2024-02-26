@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/comment", "destination": "/api/comment.js" },
+    { "source": "/api/comment/:id", "destination": "/api/delete_comment.js" }
+  ]
+}
