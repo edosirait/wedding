@@ -2,13 +2,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3');
 const path = require('path');
-const app = express();
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
 const admin = require('firebase-admin');
 const serviceAccount = require('./config/invitation-bb4c6-firebase-adminsdk-yckfv-92c53b0052'); // Ganti dengan path yang sesuai
 
@@ -16,6 +9,14 @@ admin.initializeApp({
     credential: admin.credential.cert(serviceAccount),
     databaseURL: "https://invitation-bb4c6-default-rtdb.asia-southeast1.firebasedatabase.app/" // Ganti dengan URL database Firebase Anda
 });
+
+
+const app = express();
+
+app.use(express.static(path.join(__dirname, 'public')));
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
 
 const db = admin.database();
 
