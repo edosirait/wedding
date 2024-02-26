@@ -9,9 +9,36 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
+const admin = require('firebase-admin');
+const serviceAccount = require('./config/invitation-bb4c6-firebase-adminsdk-yckfv-92c53b0052'); // Ganti dengan path yang sesuai
 
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+    databaseURL: "https://invitation-bb4c6-default-rtdb.asia-southeast1.firebasedatabase.app/" // Ganti dengan URL database Firebase Anda
+});
+
+const db = admin.database();
+
+// Menambahkan entri awal ke Firebase
+const data = {
+    nama: "Contoh Nama",
+    hadir: true,
+    komentar: "Ini adalah contoh komentar"
+};
+
+// Referensi ke node di Firebase
+const commentsRef = db.ref("comments");
+
+// Menambahkan data ke Firebase
+commentsRef.push(data)
+    .then(() => {
+        console.log("Data berhasil ditambahkan ke Firebase");
+    })
+    .catch(error => {
+        console.error("Gagal menambahkan data ke Firebase:", error);
+    });
 // Inisialisasi database SQLite
-const db = new sqlite3.Database('./comments.db', sqlite3.OPEN_READWRITE, (err) => {
+const dbs = new sqlite3.Database('./comments.db', sqlite3.OPEN_READWRITE, (err) => {
     if (err) {
         console.error(err.message);
     }
@@ -29,7 +56,7 @@ app.post('/api/comment', (req, res) => {
     const sql = `INSERT INTO comments (nama, hadir, komentar) VALUES (?, ?, ?)`;
     const params = [nama, hadirBoolean ? 1 : 0, komentar]; // Simpan sebagai 1 atau 0
 
-    db.run(sql, params, function(err) {
+    dbs.run(sql, params, function(err) {
         if (err) {
             res.status(400).json({ error: err.message });
             return;
@@ -45,7 +72,7 @@ app.post('/api/comment', (req, res) => {
 // Endpoint untuk mendapatkan semua komentar
 app.get('/api/comment', (req, res) => {
     const sql = `SELECT * FROM comments`;
-    db.all(sql, [], (err, rows) => {
+    dbs.all(sql, [], (err, rows) => {
         if (err) {
             res.status(400).json({ error: err.message });
             return;
@@ -72,9 +99,6 @@ app.delete('/api/comment/:id', (req, res) => {
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-// Server static files from 'public' directory
-// app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

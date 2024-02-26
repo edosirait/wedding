@@ -1,37 +1,41 @@
-const sqlite3 = require('sqlite3');
-const db = new sqlite3.Database('./comments.db', sqlite3.OPEN_READWRITE);
+const admin = require('firebase-admin');
+
 
 module.exports = (req, res) => {
-    if (req.method === 'GET') {
-        const sql = `SELECT * FROM comments`;
-        db.all(sql, [], (err, rows) => {
-            if (err) {
-                res.status(400).json({ error: err.message });
-                return;
-            }
-            res.json({
-                message: 'Berhasil mendapatkan semua komentar',
-                data: rows
-            });
-        });
-    } else if (req.method === 'POST') {
+    if (req.method === 'POST') {
         const { nama, hadir, komentar } = req.body;
+        const commentsRef = admin.database().ref('comments');
+        const newCommentRef = commentsRef.push();
 
-        // Pastikan nilai hadir dikonversi ke tipe data yang benar
-        const hadirBoolean = hadir === true || hadir === 'true';
-
-        const sql = `INSERT INTO comments (nama, hadir, komentar) VALUES (?, ?, ?)`;
-        const params = [nama, hadirBoolean ? 1 : 0, komentar]; // Simpan sebagai 1 atau 0
-
-        db.run(sql, params, function(err) {
-            if (err) {
-                res.status(400).json({ error: err.message });
-                return;
+        newCommentRef.set({ nama, hadir, komentar }, error => {
+            if (error) {
+                res.status(400).json({ error: error.message });
+            } else {
+                res.status(201).json({
+                    message: 'Komentar ditambahkan',
+                    id: newCommentRef.key,
+                    nama,
+                    hadir,
+                    komentar
+                });
             }
-            res.status(201).json({
-                message: 'Komentar ditambahkan',
-                data: { id: this.lastID, nama, hadir: hadirBoolean, komentar }
-            });
+        });
+    } else if (req.method === 'GET') {
+        const commentsRef = admin.database().ref('comments');
+        commentsRef.once('value', (snapshot) => {
+            const comments = snapshot.val();
+            if (comments) {
+                const commentsArray = Object.keys(comments).map(key => ({
+                    id: key,
+                    ...comments[key]
+                }));
+                res.json({
+                    message: 'Berhasil mendapatkan semua komentar',
+                    data: commentsArray
+                });
+            } else {
+                res.status(400).json({ error: 'Tidak ada komentar' });
+            }
         });
     }
 };
