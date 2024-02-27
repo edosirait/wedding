@@ -1,4 +1,4 @@
-const pool = require('/db'); // Menggunakan path yang sesuai
+const db = require('./db');
 
 module.exports = (req, res) => {
     const commentId = req.params.id; // Pastikan 'id' dikirim melalui parameter request
@@ -6,7 +6,7 @@ module.exports = (req, res) => {
     const sql = 'DELETE FROM comments WHERE id = $1';
     const values = [commentId];
 
-    pool.query(sql, values)
+    db.query(sql, values)
         .then(result => {
             if (result.rowCount > 0) {
                 res.json({ message: 'Komentar dihapus' });

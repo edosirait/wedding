@@ -1,4 +1,4 @@
-const pool = require('/db'); // Menggunakan path yang sesuai
+const db = require('./db');
 
 module.exports = (req, res) => {
     if (req.method === 'POST') {
@@ -9,7 +9,7 @@ module.exports = (req, res) => {
         const sql = 'INSERT INTO comments (nama, hadir, komentar) VALUES ($1, $2, $3) RETURNING *';
         const values = [nama, hadirBoolean, komentar];
 
-        pool.query(sql, values, (error, result) => {
+        db.query(sql, values, (error, result) => {
             if (error) {
                 res.status(400).json({ error: error.message });
             } else {
@@ -26,7 +26,7 @@ module.exports = (req, res) => {
     } else if (req.method === 'GET') {
         const sql = 'SELECT * FROM comments';
 
-        pool.query(sql)
+        db.query(sql)
             .then(result => {
                 res.json({
                     message: 'Berhasil mendapatkan semua komentar',

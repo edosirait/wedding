@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const { Client } = require('pg');
 const path = require('path');
-const pool = require('/db'); // Menggunakan koneksi pool PostgreSQL dari db.js
+const pool = require('./db'); // Menggunakan koneksi pool PostgreSQL dari db.js
 
 const app = express();
 
