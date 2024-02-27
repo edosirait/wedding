@@ -1,4 +1,4 @@
-const db = require('./db');
+import db from './db.js';
 
 module.exports = (req, res) => {
     const commentId = req.params.id; // Pastikan 'id' dikirim melalui parameter request

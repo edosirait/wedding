@@ -1,4 +1,4 @@
-const db = require('./db');
+import db from './db.js';
 
 module.exports = (req, res) => {
     if (req.method === 'POST') {
