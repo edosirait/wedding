@@ -15,5 +15,12 @@
       <jdbc-url>jdbc:postgresql://localhost:5433/comments</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="agvzemkh@rain.db.elephantsql.com" uuid="b6dce93d-c8a3-4351-a1bc-a46c46a18368">
+      <driver-ref>postgresql</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.postgresql.Driver</jdbc-driver>
+      <jdbc-url>jdbc:postgresql://rain.db.elephantsql.com/agvzemkh</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

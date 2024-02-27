@@ -1,11 +1,11 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-    user: 'postgres',
-    host: '192.168.100.5',
-    database: 'comments', // Nama database yang telah Anda buat
-    password: 'admin123', // Ganti dengan password database Anda
-    port: 5433
+    user: 'agvzemkh',
+    host: 'rain.db.elephantsql.com',
+    database: 'agvzemkh', // Nama database yang telah Anda buat
+    password: 'KP7XzKwSbZEyfnRiIY8QQUbKUZ9bsBeD', // Ganti dengan password database Anda
+    port: ''
 });
 
 module.exports = pool;
