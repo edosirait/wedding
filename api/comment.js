@@ -1,4 +1,4 @@
-const pool = require('./db'); // Menggunakan path yang sesuai
+const pool = require('/db'); // Menggunakan path yang sesuai
 
 module.exports = (req, res) => {
     if (req.method === 'POST') {

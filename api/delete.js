@@ -1,4 +1,4 @@
-const pool = require('./db'); // Menggunakan path yang sesuai
+const pool = require('/db'); // Menggunakan path yang sesuai
 
 module.exports = (req, res) => {
     const commentId = req.params.id; // Pastikan 'id' dikirim melalui parameter request
