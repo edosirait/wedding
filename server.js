@@ -1,15 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const sqlite3 = require('sqlite3');
+const { Client } = require('pg');
 const path = require('path');
-const admin = require('firebase-admin');
-const serviceAccount = require('./config/invitation-bb4c6-firebase-adminsdk-yckfv-92c53b0052'); // Ganti dengan path yang sesuai
-
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://invitation-bb4c6-default-rtdb.asia-southeast1.firebasedatabase.app/" // Ganti dengan URL database Firebase Anda
-});
-
+const pool = require("./db"); // Menggunakan koneksi pool PostgreSQL dari db.js
 
 const app = express();
 
@@ -17,84 +10,55 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-
-const db = admin.database();
-
-// Menambahkan entri awal ke Firebase
-const data = {
-    nama: "Contoh Nama",
-    hadir: true,
-    komentar: "Ini adalah contoh komentar"
-};
-
-// Referensi ke node di Firebase
-const commentsRef = db.ref("comments");
-
-// Menambahkan data ke Firebase
-commentsRef.push(data)
-    .then(() => {
-        console.log("Data berhasil ditambahkan ke Firebase");
-    })
-    .catch(error => {
-        console.error("Gagal menambahkan data ke Firebase:", error);
-    });
-// Inisialisasi database SQLite
-const dbs = new sqlite3.Database('./comments.db', sqlite3.OPEN_READWRITE, (err) => {
-    if (err) {
-        console.error(err.message);
-    }
-    console.log('Connected to the SQLite database.');
-});
-
-
 // Endpoint untuk menambahkan komentar baru
 app.post('/api/comment', (req, res) => {
     const { nama, hadir, komentar } = req.body;
-
-    // Pastikan nilai hadir dikonversi ke tipe data yang benar
     const hadirBoolean = hadir === true || hadir === 'true';
 
-    const sql = `INSERT INTO comments (nama, hadir, komentar) VALUES (?, ?, ?)`;
-    const params = [nama, hadirBoolean ? 1 : 0, komentar]; // Simpan sebagai 1 atau 0
+    const sql = 'INSERT INTO comments (nama, hadir, komentar) VALUES ($1, $2, $3) RETURNING *';
+    const values = [nama, hadirBoolean, komentar];
 
-    dbs.run(sql, params, function(err) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
+    pool.query(sql, values, (error, result) => {
+        if (error) {
+            res.status(400).json({ error: error.message });
+        } else {
+            const { id, nama, hadir, komentar } = result.rows[0];
+            res.status(201).json({
+                message: 'Komentar ditambahkan',
+                data: { id, nama, hadir, komentar }
+            });
         }
-        res.status(201).json({
-            message: 'Komentar ditambahkan',
-            data: { id: this.lastID, nama, hadir: hadirBoolean, komentar }
-        });
     });
 });
-
 
 // Endpoint untuk mendapatkan semua komentar
 app.get('/api/comment', (req, res) => {
     const sql = `SELECT * FROM comments`;
-    dbs.all(sql, [], (err, rows) => {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        res.json({
-            message: 'Berhasil mendapatkan semua komentar',
-            data: rows
+    pool.query(sql)
+        .then(result => {
+            res.json({
+                message: 'Berhasil mendapatkan semua komentar',
+                data: result.rows
+            });
+        })
+        .catch(error => {
+            console.error("Gagal mendapatkan komentar:", error);
+            res.status(500).json({ error: 'Gagal mendapatkan komentar' });
         });
-    });
 });
 
 // Endpoint untuk menghapus komentar
 app.delete('/api/comment/:id', (req, res) => {
-    const sql = `DELETE FROM comments WHERE id = ?`;
-    db.run(sql, req.params.id, function(err) {
-        if (err) {
-            res.status(400).json({ error: err.message });
-            return;
-        }
-        res.json({ message: 'Komentar dihapus', changes: this.changes });
-    });
+    const id = req.params.id;
+    const sql = `DELETE FROM comments WHERE id = $1`;
+    pool.query(sql, [id])
+        .then(result => {
+            res.json({ message: 'Komentar dihapus', changes: result.rowCount });
+        })
+        .catch(error => {
+            console.error("Gagal menghapus komentar:", error);
+            res.status(500).json({ error: 'Gagal menghapus komentar' });
+        });
 });
 
 app.get('/', (req, res) => {

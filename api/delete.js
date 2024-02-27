@@ -1,14 +1,21 @@
-const admin = require('firebase-admin');
+const pool = require('./db'); // Menggunakan path yang sesuai
 
 module.exports = (req, res) => {
     const commentId = req.params.id; // Pastikan 'id' dikirim melalui parameter request
-    const commentRef = admin.database().ref(`comments/${commentId}`);
 
-    commentRef.remove()
-        .then(() => {
-            res.json({ message: 'Komentar dihapus' });
+    const sql = 'DELETE FROM comments WHERE id = $1';
+    const values = [commentId];
+
+    pool.query(sql, values)
+        .then(result => {
+            if (result.rowCount > 0) {
+                res.json({ message: 'Komentar dihapus' });
+            } else {
+                res.status(404).json({ error: 'Komentar tidak ditemukan' });
+            }
         })
-        .catch((error) => {
-            res.status(400).json({ error: error.message });
+        .catch(error => {
+            console.error("Gagal menghapus komentar:", error);
+            res.status(500).json({ error: 'Gagal menghapus komentar' });
         });
 };

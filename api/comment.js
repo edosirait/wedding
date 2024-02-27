@@ -1,19 +1,22 @@
-const admin = require('firebase-admin');
-
+const pool = require('./db'); // Menggunakan path yang sesuai
 
 module.exports = (req, res) => {
     if (req.method === 'POST') {
         const { nama, hadir, komentar } = req.body;
-        const commentsRef = admin.database().ref('comments');
-        const newCommentRef = commentsRef.push();
 
-        newCommentRef.set({ nama, hadir, komentar }, error => {
+        const hadirBoolean = hadir === true || hadir === 'true';
+
+        const sql = 'INSERT INTO comments (nama, hadir, komentar) VALUES ($1, $2, $3) RETURNING *';
+        const values = [nama, hadirBoolean, komentar];
+
+        pool.query(sql, values, (error, result) => {
             if (error) {
                 res.status(400).json({ error: error.message });
             } else {
+                const { id, nama, hadir, komentar } = result.rows[0];
                 res.status(201).json({
                     message: 'Komentar ditambahkan',
-                    id: newCommentRef.key,
+                    id,
                     nama,
                     hadir,
                     komentar
@@ -21,21 +24,18 @@ module.exports = (req, res) => {
             }
         });
     } else if (req.method === 'GET') {
-        const commentsRef = admin.database().ref('comments');
-        commentsRef.once('value', (snapshot) => {
-            const comments = snapshot.val();
-            if (comments) {
-                const commentsArray = Object.keys(comments).map(key => ({
-                    id: key,
-                    ...comments[key]
-                }));
+        const sql = 'SELECT * FROM comments';
+
+        pool.query(sql)
+            .then(result => {
                 res.json({
                     message: 'Berhasil mendapatkan semua komentar',
-                    data: commentsArray
+                    data: result.rows
                 });
-            } else {
-                res.status(400).json({ error: 'Tidak ada komentar' });
-            }
-        });
+            })
+            .catch(error => {
+                console.error("Gagal mendapatkan komentar:", error);
+                res.status(500).json({ error: 'Gagal mendapatkan komentar' });
+            });
     }
 };

@@ -240,34 +240,34 @@ const util = (() => {
     };
 })();
 
-// const progress = (() => {
-//
-//     const assets = document.querySelectorAll('img');
-//     const info = document.getElementById('progress-info');
-//     const bar = document.getElementById('bar');
-//
-//     let total = assets.length;
-//     let loaded = 0;
-//
-//     const progress = () => {
-//         loaded += 1;
-//
-//         bar.style.width = Math.min((loaded / total) * 100, 100).toString() + "%";
-//         info.innerText = `Loading assets (${loaded}/${total}) [${parseInt(bar.style.width).toFixed(0)}%]`;
-//
-//         if (loaded == total) {
-//             util.show();
-//         }
-//     };
-//
-//     assets.forEach((asset) => {
-//         if (asset.complete && (asset.naturalWidth !== 0)) {
-//             progress();
-//         } else {
-//             asset.addEventListener('load', () => progress());
-//         }
-//     });
-// })();
+const progress = (() => {
+
+    const assets = document.querySelectorAll('img');
+    const info = document.getElementById('progress-info');
+    const bar = document.getElementById('bar');
+
+    let total = assets.length;
+    let loaded = 0;
+
+    // const progress = () => {
+    //     loaded += 1;
+    //
+    //     bar.style.width = Math.min((loaded / total) * 100, 100).toString() + "%";
+    //     info.innerText = `Loading assets (${loaded}/${total}) [${parseInt(bar.style.width).toFixed(0)}%]`;
+    //
+    //     if (loaded == total) {
+    //         util.show();
+    //     }
+    // };
+
+    // assets.forEach((asset) => {
+    //     if (asset.complete && (asset.naturalWidth !== 0)) {
+    //         progress();
+    //     } else {
+    //         asset.addEventListener('load', () => progress());
+    //     }
+    // });
+})();
 
 const audio = (() => {
     let audio = null;
